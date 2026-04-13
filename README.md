@@ -126,21 +126,25 @@ kubectl get services
 
 ## Step 7: Access the Application (Optional)
 
-### 7.1 Determine the ingress port:
+### 7.1 Port-forward to the Istio Ingress Gateway (Recommended for local kind cluster):
 ```bash
-kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}'
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80 8443:443
 ```
 
-### 7.2 Get a worker node IP:
+### 7.2 Access the application in a new terminal:
 ```bash
-kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'
+curl http://localhost:8080/productpage
 ```
 
-### 7.3 Access the application:
+### 7.3 (Alternative) Port-forward to a specific service directly:
 ```bash
-INGRESS_HOST=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
-curl "http://$INGRESS_HOST:$INGRESS_PORT/productpage"
+# For example, port-forward to productpage service
+kubectl port-forward svc/productpage 9080:9080
+```
+
+### 7.4 Then access in a new terminal:
+```bash
+curl http://localhost:9080/productpage
 ```
 
 ## Cleanup
