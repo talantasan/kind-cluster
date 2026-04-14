@@ -147,6 +147,57 @@ kubectl port-forward svc/productpage 9080:9080
 curl http://localhost:9080/productpage
 ```
 
+## Step 8: Deploy Monitoring Stack (Prometheus & Grafana) Exposed to Istio Mesh
+
+The monitoring stack is configured in `monitoring/app-monitoring.yaml` and automatically exposes services through the Istio mesh.
+
+### 8.1 Deploy monitoring services:
+```bash
+kubectl apply -f monitoring/app-monitoring.yaml
+```
+
+### 8.2 Verify monitoring deployment:
+```bash
+kubectl get pods -n monitoring
+kubectl get svc -n monitoring
+```
+
+### 8.3 Verify Istio resources:
+```bash
+kubectl get gateway -n monitoring
+kubectl get virtualservice -n monitoring
+```
+
+### 8.4 Port-forward to access services:
+```bash
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+```
+
+### 8.5 Access the services in another terminal:
+
+**Prometheus:**
+```bash
+curl -H "Host: prometheus.local" http://localhost:8080
+```
+
+**Grafana:**
+```bash
+curl -H "Host: grafana.local" http://localhost:8080
+```
+
+Or open in browser:
+- Prometheus: `http://localhost:8080` (with Host header set to `prometheus.local`)
+- Grafana: `http://localhost:8080` (with Host header set to `grafana.local`) - Default login: `admin/admin`
+
+### 8.6 What's included in the monitoring stack:
+
+- **Namespace**: `monitoring` with Istio sidecar injection enabled
+- **Prometheus**: Configured to scrape Kubernetes metrics and Istio metrics
+- **Grafana**: Pre-configured with admin user for visualization
+- **Istio Gateway**: Routes HTTP traffic for monitoring services
+- **VirtualServices**: Routes traffic to Prometheus and Grafana through the gateway
+- **RBAC**: ServiceAccount and permissions for Prometheus to access Kubernetes API
+
 ## Cleanup
 
 ### Delete the kind cluster:
